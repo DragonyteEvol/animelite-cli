@@ -7,7 +7,7 @@ def _cargar():
         return
     import importlib
 
-    for nombre in ("voe", "yourupload", "mp4upload", "packer", "okru", "directo", "respaldo"):
+    for nombre in ("voe", "yourupload", "mp4upload", "packer", "okru", "directo", "maru", "netu", "respaldo"):
         try:
             _modulos[nombre] = importlib.import_module(f".{nombre}", __name__)
         except Exception as exc:
@@ -73,6 +73,12 @@ EMBED_HOSTS = {
     "goodstream": "directo",
     "goodstream.uno": "directo",
     "goodstream.one": "directo",
+    "maru": "maru",
+    "my.mail.ru": "maru",
+    "netu": "netu",
+    "hqq.tv": "netu",
+    "hqq": "netu",
+    "streamvid": "netu",
 }
 
 
