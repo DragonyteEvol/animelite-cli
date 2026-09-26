@@ -16,7 +16,7 @@ _RE_TITLE_SUF = re.compile(r"\s*(?:Sub\s+espa[ñn]ol\s+latino|Online\s+Gratis)\s
 _RE_EPS = re.compile(r"var eps\s*=\s*\[((?:\[[^\]]*\]\s*,?\s*)+)\];")
 _RE_ENCRYPT = re.compile(r'data-encrypt="([^"]+)"')
 _RE_LI = re.compile(
-    r'<li encrypt="([0-9a-fA-F]+)"[^>]*title="[^"]*"[^>]*>(.*?)</li>', re.S
+    r"<li[^>]*encrypt=\"([0-9a-fA-F]+)\"[^>]*>(.*?)</li>", re.S
 )
 _RE_SPAN = re.compile(r"<span>(.*?)</span>", re.S)
 
@@ -72,6 +72,7 @@ def episodios(anime: Anime) -> list:
     for num, cod in _dec_eps(m.group(1)):
         url = f"{BASE}/ver/{anime.slug}-{num}" + (f"-{cod}" if cod else "")
         out.append(Episodio(numero=num, url=url))
+    out.sort(key=lambda e: e.numero)
     return out
 
 

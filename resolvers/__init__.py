@@ -44,6 +44,11 @@ EMBED_HOSTS = {
     "mixdroop.bz": "packer",
     "filemoon": "packer",
     "bysekoze": "packer",
+    "bysesukior.com": "packer",
+    "byse": "packer",
+    "dooodster.com": "packer",
+    "filelions.top": "packer",
+    "lulustream": "packer",
     "doodstream": "packer",
     "doodstream.com": "packer",
     "playmogo": "packer",
@@ -77,17 +82,20 @@ EMBED_HOSTS = {
     "my.mail.ru": "maru",
     "netu": "netu",
     "hqq.tv": "netu",
+    "hqq.ac": "netu",
     "hqq": "netu",
     "streamvid": "netu",
 }
 
 
 def _host_para(embed) -> str:
+    import re
     if getattr(embed, "modulo", None):
         return embed.modulo
     h = (embed.host or "").lower()
+    h_norm = re.sub(r"\s+\d+(?:\s|$)", "", h)
     h2 = h.split(".")[-2] if "." in h else ""
-    for k in (h, h2):
+    for k in (h, h_norm, h2):
         if k in EMBED_HOSTS:
             return EMBED_HOSTS[k]
     return ""
