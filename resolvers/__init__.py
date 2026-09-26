@@ -7,7 +7,7 @@ def _cargar():
         return
     import importlib
 
-    for nombre in ("voe", "yourupload", "mp4upload", "packer", "okru", "respaldo"):
+    for nombre in ("voe", "yourupload", "mp4upload", "packer", "okru", "directo", "respaldo"):
         try:
             _modulos[nombre] = importlib.import_module(f".{nombre}", __name__)
         except Exception as exc:
@@ -44,11 +44,35 @@ EMBED_HOSTS = {
     "mixdroop.bz": "packer",
     "filemoon": "packer",
     "bysekoze": "packer",
+    "doodstream": "packer",
+    "doodstream.com": "packer",
+    "playmogo": "packer",
+    "playmogo.com": "packer",
+    "luluvdo": "packer",
+    "luluvdo.com": "packer",
+    "swhoi": "packer",
+    "swhoi.com": "packer",
     "voeun": "voe",
     "ok.ru": "okru",
     "okru": "okru",
     "videoembed": "okru",
     "sw": "packer",
+    "uqload": "directo",
+    "uqload.com": "directo",
+    "uqload.vc": "directo",
+    "solidfiles": "directo",
+    "solidfiles.com": "directo",
+    "videobin": "directo",
+    "videobin.co": "directo",
+    "embedwish": "directo",
+    "embedwish.com": "directo",
+    "vid-guard": "directo",
+    "vid-guard.com": "directo",
+    "d-s": "directo",
+    "d-s.io": "directo",
+    "goodstream": "directo",
+    "goodstream.uno": "directo",
+    "goodstream.one": "directo",
 }
 
 

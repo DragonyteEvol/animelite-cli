@@ -10,9 +10,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reproductor
 from core import probe
 from resolvers import aplicar
-from sitios import animeflv, jkanime, tioanime
+from sitios import animeflv, jkanime, monoschinos, tioanime
 
-SITIOS = [tioanime, jkanime, animeflv]
+SITIOS = [tioanime, jkanime, animeflv, monoschinos]
 
 try:
     import colorama
@@ -347,19 +347,19 @@ def reproducir_capitulo(grupo, bloques, cap, mayor, reintentar=True):
 
     if not seleccion:
         pintar("\nNo se obtuvieron servidores para este capitulo. Reintenta.", "rojo")
-        return
+        return streams, candidatos
 
     if etiqueta:
         pintar(f"\n{etiqueta}", "amarillo")
     if _reproducir_varios(streams, seleccion, grupo, cap):
-        return
+        return streams, candidatos
 
     # Si mpv fallo con los enlaces actuales, re-obtener frescos (los tokens
     # de los embeds expiran) y reintentar una vez mas.
     if not reintentar:
         pintar("\nTodos los servidores disponibles fallaron al abrir con "
                "mpv. Elige otra opcion.", "rojo")
-        return
+        return streams, candidatos
     pintar("Los enlaces podrian haber vencido. Re-obteniendo enlaces "
            "frescos ...", "amarillo")
     streams, fallidos = recoger_streams(cap, bloques,
@@ -372,11 +372,12 @@ def reproducir_capitulo(grupo, bloques, cap, mayor, reintentar=True):
         {"host": s.host, "url": s.url} for s in streams[:2]
     ]
     if seleccion and _reproducir_varios(streams, seleccion, grupo, cap):
-        return
+        return streams, candidatos
 
     barra(85, "Ningun stream respondio a tiempo")
     print()
     pintar("\nNingun servidor respondio a prueba de velocidad. Reintenta.", "rojo")
+    return streams, candidatos
 
 
 def _reproducir_varios(streams, seleccion, grupo, cap):
@@ -413,11 +414,13 @@ def _reproducir_varios(streams, seleccion, grupo, cap):
     return False
 
 
-def menu_post_reproduccion(cap, mayor):
+def menu_post_reproduccion(cap, mayor, streams=None):
     print("\n--- Que sigue? ---")
     print("  [Enter]  Siguiente capitulo")
     print("  [a]      Capitulo anterior")
     print("  [n]      Elegir otro numero")
+    if streams:
+        print("  [v]      Elegir otro servidor")
     print("  [b]      Buscar otro anime")
     print("  [q]      Salir")
     op = input("> ").strip().lower()
@@ -425,6 +428,8 @@ def menu_post_reproduccion(cap, mayor):
         return "siguiente", min(cap + 1, mayor)
     if op == "a":
         return "anterior", max(cap - 1, 1)
+    if op == "v":
+        return "servidor", cap
     if op == "n":
         sel = input(f"Nuevo capitulo? (1-{mayor}) > ").strip()
         if sel.isdigit() and 1 <= int(sel) <= mayor:
@@ -436,6 +441,71 @@ def menu_post_reproduccion(cap, mayor):
     if op == "q":
         return "salir", cap
     return "menu", cap
+
+
+def _reescanear_servidores(cap, bloques):
+    barra(0, "Re-escaneando servidores ...")
+    streams, fallidos = recoger_streams(cap, bloques,
+                                        on_progreso=barra, verbose=False)
+    if streams:
+        barra(60, "Sitios escaneados")
+        print()
+    candidatos = _probe_con_barra(streams) if streams else []
+    return streams, candidatos
+
+
+def elegir_servidor(streams, candidatos, grupo, cap, bloques):
+    """Menu para elegir a mano un servidor de los que respondieron (o
+    re-escanear). Devuelve (streams, candidatos) posiblemente refrescados."""
+    de_cand = {(c.get("host"), c.get("url")) for c in (candidatos or [])}
+    while True:
+        orden = []
+        vistos = set()
+        for s in streams or []:
+            k = (s.host, s.url)
+            if k in vistos:
+                continue
+            vistos.add(k)
+            orden.append((s, k in de_cand))
+        if not orden:
+            pintar("\nNo hay servidores disponibles. Re-escanear para "
+                   "buscar operativos.", "amarillo")
+            op = input("[r] Re-escanear / [m] Volver al menu > ").strip().lower()
+            if op == "r":
+                streams, candidatos = _reescanear_servidores(cap, bloques)
+                de_cand = {(c.get("host"), c.get("url"))
+                           for c in (candidatos or [])}
+                continue
+            return streams, candidatos
+        print("\nServidores disponibles:")
+        for i, (s, ok) in enumerate(orden):
+            marca = "  (respondio)" if ok else ""
+            print(f"  [{i}] {sin_tildes(s.host)}{marca}")
+        sel = input("[i] Servidor / [r] Re-escanear / [m] Volver al menu > "
+                    ).strip().lower()
+        if sel in ("m", ""):
+            return streams, candidatos
+        if sel == "r":
+            streams, candidatos = _reescanear_servidores(cap, bloques)
+            de_cand = {(c.get("host"), c.get("url"))
+                       for c in (candidatos or [])}
+            continue
+        if sel.isdigit() and int(sel) < len(orden):
+            s = orden[int(sel)][0]
+            pintar(f"\nAbriendo en mpv: {grupo.titulo} - Capitulo {cap} ...",
+                   "verde")
+            ok = reproductor.reproducir(
+                s.url, referer=s.referer,
+                titulo=f"{grupo.titulo} - Capitulo {cap}",
+            )
+            if ok:
+                pintar(f"Reproduciendo {grupo.titulo} - Capitulo {cap}",
+                       "verde")
+            else:
+                pintar("Ese servidor fallo (los enlaces vencen). "
+                       "Usa [r] para re-escanear.", "amarillo")
+            return streams, candidatos
+        print("Seleccion invalida.")
 
 
 def main():
@@ -482,17 +552,23 @@ def main():
                 continue
             cap = int(sel)
 
-            reproducir_capitulo(grupo, bloques, cap, mayor)
+            streams, candidatos = reproducir_capitulo(grupo, bloques, cap,
+                                                      mayor)
 
             # Tras cerrar mpv: menu para continuar sin salir del programa.
             while True:
-                accion, cap = menu_post_reproduccion(cap, mayor)
+                accion, cap = menu_post_reproduccion(cap, mayor, streams)
                 if accion == "salir":
                     return
                 if accion == "buscar":
                     break
+                if accion == "servidor":
+                    streams, candidatos = elegir_servidor(
+                        streams, candidatos, grupo, cap, bloques)
+                    continue
                 if accion in ("siguiente", "anterior", "cap"):
-                    reproducir_capitulo(grupo, bloques, cap, mayor)
+                    streams, candidatos = reproducir_capitulo(
+                        grupo, bloques, cap, mayor)
                 # "menu" (entrada invalida) vuelve a mostrar el menu
         except KeyboardInterrupt:
             break
