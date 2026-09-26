@@ -1,0 +1,65 @@
+============================================================
+  ANIME CLI  -  buscador y reproductor por consola
+============================================================
+Buscar animerock
+
+Resultados (15 anime(s), maximo 15):
+  [0] Bocchi the Rock!
+  [1] Bakumatsu Rock
+  [2] Show By Rock!!
+  [3] Show by Rock!! Stars!!
+  [4] Rock wa Lady no Tashinami deshite
+  [5] Black Rock Shooter (TV)
+  [6] Black Rock Shooter
+  [7] Show By Rock!! Mashumairesh!!
+  [8] Rock Lee no Seishun Full-Power Ninden
+  [9] Megaman Upon a Star
+  [10] BlackRock Shooter: Dawn Fall
+  [11] Ruri no Houseki
+  [12] Besame Licia (Aishite Knight) Castellano
+  [13] Black Rock Shooter OVA
+  [14] Kachou Ouji: Hard Rock Save the Space
+Elige un anime (numero):
+Seleccion invalida.
+Elige un anime (numero): 0
+
+Total: 12 episodios (rango 1-12)
+Que capitulo reproducir? (1-12) > 1
+  [################------------]  60% Sitios escaneados       p 1 ...
+  [#######################-----]  85% Midiendo latencia ...
+Ningun stream respondio a la prueba de velocidad. Probando con mpv directamente ...
+  [#########################---]  90% Lanzando mpv (intento 1/2) ...
+
+Reproduciendo Bocchi the Rock! - Capitulo 1 ...
+
+[reproductor] mpv termino con error (2)
+mpv fallo con ese servidor. Probando el siguiente (2/2) ...
+  [#########################---]  90% Lanzando mpv (intento 2/2) ...
+
+Reproduciendo Bocchi the Rock! - Capitulo 1 ...
+
+[reproductor] mpv termino con error (2)
+Los enlaces podrian haber vencido. Re-obteniendo enlaces frescos ...
+  [################------------]  60% Sitios re-escaneados    p 1 ...
+  [#########################---]  90% Lanzando mpv (intento 1/2) ...
+
+Reproduciendo Bocchi the Rock! - Capitulo 1 ...
+
+[reproductor] mpv termino con error (2)
+mpv fallo con ese servidor. Probando el siguiente (2/2) ...
+  [#########################---]  90% Lanzando mpv (intento 2/2) ...
+
+Reproduciendo Bocchi the Rock! - Capitulo 1 ...
+
+[reproductor] mpv termino con error (2)
+  [#######################-----]  85% Ningun stream respondio a tiempo
+
+Ningun servidor respondio a prueba de velocidad. Reintenta.
+
+--- Que sigue? ---
+  [Enter]  Siguiente capitulo
+  [a]      Capitulo anterior
+  [n]      Elegir otro numero
+  [b]      Buscar otro anime
+  [q]      Salir
+>
