@@ -13,7 +13,7 @@ _RE_CARD = re.compile(
     re.S,
 )
 _RE_TITLE_SUF = re.compile(r"\s*(?:Sub\s+espa[ñn]ol\s+latino|Online\s+Gratis)\s*$", re.I)
-_RE_EPS = re.compile(r"var eps\s*=\s*(\[[^\]]*\])")
+_RE_EPS = re.compile(r"var eps\s*=\s*\[((?:\[[^\]]*\]\s*,?\s*)+)\];")
 _RE_ENCRYPT = re.compile(r'data-encrypt="([^"]+)"')
 _RE_LI = re.compile(
     r'<li encrypt="([0-9a-fA-F]+)"[^>]*title="[^"]*"[^>]*>(.*?)</li>', re.S

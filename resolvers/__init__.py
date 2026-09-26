@@ -109,17 +109,22 @@ def aplicar(embeds: list, max_workers=5):
     streams = []
     fallidos = []
     limite = 4.0
+    tope = 8.0
     t0 = time.perf_counter()
     ex = ThreadPoolExecutor(max_workers=max_workers)
     try:
         futuros = set(ex.submit(_uno, e) for e in embeds)
         pendientes = futuros
         while pendientes:
-            restante = limite - (time.perf_counter() - t0)
+            t = time.perf_counter() - t0
+            if t >= tope:
+                break
+            restante = limite - t
             if restante <= 0:
                 if streams:
                     break
                 restante = 2.0
+            restante = min(restante, tope - t)
             done, pendientes = wait(
                 pendientes, timeout=restante, return_when=FIRST_COMPLETED
             )
