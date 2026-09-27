@@ -78,7 +78,7 @@ def buscar():
 
     Reintenta hasta 3 veces ante fallos de conexion. Devuelve ("salir", None)
     si la consulta esta vacia, o (None, None) si se agotaron los intentos."""
-    query = input("Buscar anime").strip()
+    query = input("Buscar anime: ").strip()
     if not query:
         return "salir", None
     from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED

@@ -22,8 +22,25 @@ def _args_extra():
 
 
 def _encontrar_mpv():
+    # 1) Variable de entorno MPV_PATH (instalacidades locales/manuales).
+    env = os.environ.get("MPV_PATH", "").strip().strip('"')
+    if env and env.lower().endswith((".exe", ".com")) and os.path.isfile(env):
+        return env
+    # 2) Archivo de config (lo escribe el instalador en %APPDATA%\animelite).
+    try:
+        from config import leer
+        cfg = leer()
+        cfg_path = (cfg.get("mpv_path") or "").strip()
+        if cfg_path and os.path.isfile(cfg_path):
+            return cfg_path
+    except Exception:
+        pass
+    # 3) mpv disponible en el PATH (instalaciones con winget, zip manuales...).
+    via_path = shutil.which("mpv")
+    if via_path and os.path.isfile(via_path):
+        return via_path
+    # 4) Rutas de instalaciones habituales en Windows.
     for cand in (
-        shutil.which("mpv"),
         r"C:\Users\Public\Documents\mpv\mpv.exe",
         r"mpv.com",
         r"C:\Program Files\mpv\mpv.exe",
