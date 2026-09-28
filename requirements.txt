@@ -1,1 +1,2 @@
+# Dependencias de animelite-cli (instaladas en el entorno .venv)
 colorama>=0.4

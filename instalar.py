@@ -85,21 +85,73 @@ def _instalar_mpv():
     return _detectar_mpv() is not None
 
 
-def _crear_anime_bat():
-    contenido = (
+def _contenido_lanzador():
+    return (
         "@echo off\r\n"
-        "cd /d \"%~dp0\"\r\n"
+        f"cd /d \"{REPO}\"\r\n"
         "if not exist \".venv\\Scripts\\python.exe\" (\r\n"
-        "  echo Falta el entorno .venv. Ejecuta primero instalar.bat.\r\n"
+        "  echo Falta el entorno .venv. Ejecutar primero instalar.bat.\r\n"
         "  pause\r\n"
         "  exit /b 1\r\n"
         ")\r\n"
         "\".venv\\Scripts\\python.exe\" main.py %*\r\n"
         "if errorlevel 1 pause\r\n"
     )
+
+
+def _crear_anime_bat():
     with open(ANIME_BAT, "w", encoding="utf-8") as f:
-        f.write(contenido)
+        f.write(_contenido_lanzador())
     _ok("lanzador anime.bat creado")
+
+
+def _agregar_a_path_usuario(d):
+    import winreg
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0,
+                            winreg.KEY_READ) as k:
+            try:
+                actual, _ = winreg.QueryValueEx(k, "Path")
+            except FileNotFoundError:
+                actual = ""
+        if not actual or d.lower() not in actual.lower():
+            nuevo = (actual.rstrip(";") + ";" + d) if actual else d
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0,
+                                winreg.KEY_SET_VALUE) as k:
+                winreg.SetValueEx(k, "Path", 0, winreg.REG_EXPAND_SZ, nuevo)
+            _info(f"PATH de usuario actualizado con: {d}")
+        return True
+    except Exception as exc:
+        _err(f"No se pudo actualizar el PATH: {exc}")
+        return False
+
+
+def _crear_lanzador_global():
+    contenido = _contenido_lanzador()
+    local = os.environ.get("LOCALAPPDATA", "")
+    winapps = os.path.join(local, "Microsoft", "WindowsApps")
+    if os.path.isdir(winapps):
+        proba = os.path.join(winapps, ".animelite_probe")
+        try:
+            with open(proba, "w") as f:
+                f.write("")
+            os.remove(proba)
+            ruta = os.path.join(winapps, "animelite.cmd")
+            with open(ruta, "w", encoding="utf-8") as f:
+                f.write(contenido)
+            _ok(f"comando global creado: animelite ({ruta})")
+            return True
+        except Exception:
+            _info("WindowsApps no permite escribir; usando carpeta propia.")
+    bin_dir = os.path.join(local, "animelite", "bin")
+    os.makedirs(bin_dir, exist_ok=True)
+    ruta = os.path.join(bin_dir, "animelite.cmd")
+    with open(ruta, "w", encoding="utf-8") as f:
+        f.write(contenido)
+    if _agregar_a_path_usuario(bin_dir):
+        _ok(f"comando global creado: animelite ({ruta})")
+        _info("Abrir una terminal nueva para que el comando funcione.")
+    return True
 
 
 def main():
@@ -144,10 +196,12 @@ def main():
             _info("Config creada sin ruta de mpv (la app lo avisara al reproducir).")
 
     _crear_anime_bat()
+    _crear_lanzador_global()
 
     print()
     print("  Instalacion lista. Para usar:")
-    print("    anime.bat")
+    print("    animelite   (desde cualquier terminal nueva)")
+    print("    anime.bat   (doble clic en la carpeta)")
     print("  (la primera corrida puede tardar en cargar los sitios).")
     return 0
 

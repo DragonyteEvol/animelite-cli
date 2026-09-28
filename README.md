@@ -1,41 +1,48 @@
 # animelite-cli
 
-Buscador y reproductor de anime por consola. Consulta **tioanime, jkanime,
-animeflv y monoschinos**, agrupa resultados, lista servidores con medicion de
-latencia y reproduce con **mpv** (HLS/DASH/mp4) seleccionando el mejor enlace.
+Buscador y reproductor de anime por consola. Reúne resultados de varias
+fuentes, los agrupa, lista los servidores disponibles con su latencia y
+reproduce el mejor enlace con **mpv** (HLS, DASH y mp4).
 
-No requiere navegador: todo se resuelve con `urllib` estandar de Python.
+No requiere navegador: todo se resuelve con la librería estándar de Python.
+
+## Demo
+
+![animelite-cli demo](docs/demo.gif)
 
 ## Requisitos
 
-- **Windows** (probado en Windows 10/11, PowerShell y cmd).
+- **Windows 10/11** (cmd o PowerShell).
 - **Python 3.10 o superior** (probado en 3.10.11).
-- **mpv** (reproductor) — *necesario solo para reproducir*.
-- Conexion a internet (los sitios se consultan en vivo).
-- Opcional: `colorama` (colores en consola). Se instala solo al usar el
-  instalador.
+- **mpv** — necesario solo para reproducir.
+- **Internet** (las fuentes se consultan en vivo).
 
-> Sin mpv la aplicacion arranca, busca, lista episodios y servidores y mide
-> latencia sin problema. Lo unico que no hace es reproducir: avisa con el
-> comando para instalarlo y sigue navegable. No hay reproductor alternativo.
+> Sin mpv la aplicación arranca, busca, lista episodios y mide latencia sin
+> problema; lo único que no hace es reproducir (te avisa cómo instalarlo).
 
-## Instalacion (rapida)
+## Instalación
 
-1. **Doble clic en `instalar.bat`** (o, desde una terminal, `python instalar.py`).
+1. **Hacer doble clic en `instalar.bat`** (o, desde una terminal,
+   `python instalar.py`).
 
 El instalador hace por ti:
 
-1. Verifica Python 3.10+ (si falta, te indica instalarlo con `winget`).
-2. Crea un entorno virtual `.venv` y instala las dependencias.
-3. Detecta mpv (variable `MPV_PATH`, archivo de config, `PATH` o rutas
-   habituales). **Si no lo encuentra, te pregunta si lo instala con winget**
-   (`winget install --id shinchiro.mpv -e`).
-4. Guarda la ruta de mpv en `%APPDATA%\animelite\config.json` y crea el
-   lanzador `anime.bat`.
+1. Verificar Python 3.10+ (si falta, indicar cómo instalarlo con `winget`).
+2. Crear el entorno virtual `.venv` e instalar las dependencias.
+3. Detectar mpv (variable `MPV_PATH`, archivo de config, `PATH` o rutas
+   habituales). Si no lo encuentra, **preguntar si instalarlo con winget**.
+4. Guardar la ruta de mpv en `%APPDATA%\animelite\config.json`.
+5. Crear los lanzadores: `anime.bat` y el comando global **`animelite`**.
 
-3. **Ejecuta `anime.bat`**.
+2. **Abrir una terminal nueva** y escribir:
 
-### Instalacion manual (sin el instalador)
+```
+animelite
+```
+
+También funciona `anime.bat` (doble clic dentro de la carpeta).
+
+### Instalación manual
 
 ```bat
 git clone https://github.com/DragonyteEvol/animelite-cli.git
@@ -45,18 +52,36 @@ python -m venv .venv
 .venv\Scripts\python main.py
 ```
 
+## Uso
+
+1. **Escribir** el nombre del anime y **elegir** el resultado de la lista.
+2. **Elegir** el número del capítulo.
+3. La app revisa sus fuentes, resuelve los servidores, mide su latencia y
+   **abre de forma automática el mejor enlace en mpv**.
+
+Menú tras reproducir:
+
+- `Entrar` — siguiente capítulo
+- `a` — capítulo anterior
+- `n` — elegir otro número
+- `v` — elegir otro servidor
+- `b` — buscar otro anime
+- `q` — salir
+
+Dentro de la lista de servidores: `i` (número del servidor) para abrir uno,
+`r` para volver a escanear (los enlaces vencen), `m` para volver al menú.
+
 ## El reproductor (mpv)
 
-mpv se usa para abrir el stream final (m3u8/mp4). El programa lo busca en
-este orden:
+El programa busca mpv en este orden:
 
-1. **`MPV_PATH`** (variable de entorno) — apunta directamente al exe, e.g.
+1. **`MPV_PATH`** (variable de entorno) — apuntar directamente al exe, p. ej.
    `set MPV_PATH=C:\ruta\a\mpv.exe`.
 2. **`mpv_path`** del archivo de config `%APPDATA%\animelite\config.json`
    (lo escribe el instalador).
-3. **`PATH`**: `mpv` en la ruta del sistema (instalacion con winget, zip
-   manual descomprimido, etc.).
-4. **Rutas habituales**: `C:\Program Files\mpv`, `%LOCALAPPDATA%\Programs\mpv`,
+3. **`PATH`** — `mpv` accesible desde la terminal (instalación con winget o
+   zip manual).
+4. **Rutas habituales** — `C:\Program Files\mpv`, `%LOCALAPPDATA%\Programs\mpv`,
    `C:\Users\Public\Documents\mpv`, etc.
 
 ### Instalar mpv
@@ -67,73 +92,41 @@ Con winget:
 winget install --id shinchiro.mpv -e
 ```
 
-O manual: descarga el zip de mpv, descomprimelo en una carpeta (ej.
-`C:\mpv`) y anade esa carpeta al PATH, o simplemente define `MPV_PATH`.
+O manual: **descargar** el zip de mpv, **descomprimirlo** en una carpeta y
+**añadir** esa carpeta al `PATH` (o definir `MPV_PATH`).
 
-### Si no encuentras mpv
+### Si la app no encuentra mpv
 
-La app imprime:
+Muestra el comando para instalarlo. Después de instalarlo, **reiniciar** el
+programa o **volver a ejecutar** `instalar.bat` para detectar y guardar la
+ruta.
 
-```
-[reproductor] No se encontro mpv. Instalalo con:
-  winget install --id shinchiro.mpv -e
-```
+## Configuración avanzada
 
-Tras instalarlo reinicia el programa (o vuelve a ejecutar `instalar.bat`
-para que detecte y guarde la ruta).
-
-## Uso
-
-```
-anime.bat
-```
-
-1. Escribe el nombre del anime y elige el resultado.
-2. Elige capitulo.
-3. La app escanea los 4 sitios, resuelve embeds y mide la latencia de cada
-   servidor (los que responden se marcan "(respondio)") y abre el mejor en
-   mpv.
-
-Menu tras reproducir:
-
-- `Enter` — siguiente capitulo
-- `a` — capitulo anterior
-- `n` — elegir otro numero
-- `v` — **elegir otro servidor** (lista todos los obtenidos)
-- `b` — buscar otro anime
-- `q` — salir
-
-Dentro de la lista de servidores: `[i]` numero del servidor para abrirlo,
-`[r]` re-escanear servidores (los enlaces vencen), `[m]` volver al menu.
-
-## Configuracion avanzada
-
-- `MPV_PATH`: ruta al mpv.exe (prioridad maxima sobre la deteccion).
-- `MPV_EXTRA`: argumentos extra para mpv, e.g. `MPV_EXTRA=--hwdec=no` o
-  `--gpu-api=d3d11` (espacios por comillas).
+- `MPV_PATH`: ruta al `mpv.exe` (prioridad máxima sobre la detección).
+- `MPV_EXTRA`: argumentos extra para mpv, p. ej. `MPV_EXTRA=--hwdec=no`.
 - `%APPDATA%\animelite\config.json`: config generada por el instalador con la
   clave `mpv_path`.
 
 ## Problemas frecuentes
 
-- **"No se encontro mpv"** — instala mpv (arriba) y lanza de nuevo el
-  instalador o define `MPV_PATH`.
-- **"Ningun servidor respondio a prueba de velocidad"** — los CDN de los
-  embeds caen/vacien o la URL vencio. Vuelve a intentar o usa `[r]` para
-  re-escanear.
-- **Fallan todos los servidores de un capitulo** — suele ser temporal
-  (Cloudflare/anti-bot del sitio o el CDN del host); intenta mas tarde.
-- **Sin colores** — instala colorama (`pip install colorama`); es opcional.
+- **"No se encontró mpv"** — instalar mpv y lanzar de nuevo el instalador, o
+  definir `MPV_PATH`.
+- **"Ningún servidor respondió a prueba de velocidad"** — los CDN caen o la
+  URL venció; **volver a intentar** o usar `r`.
+- **Fallan todos los servidores de un capítulo** — suele ser temporal
+  (anti-bot o CDN); **intentar más tarde**.
+- **Sin colores en la consola** — instalar `colorama`; es opcional.
 
 ## Estructura
 
 ```
-main.py            CLI principal (busqueda, replica, menu)
-sitios/            adaptadores por sitio (tioanime, jkanime, animeflv, monoschinos)
-resolvers/         resolucion de embeds (voe, mp4upload, packer, okru, netu, maru, ...)
+main.py            CLI principal (búsqueda, réplica, menú)
+sitios/            adaptadores por fuente
+resolvers/         resolución de enlaces embebidos
 core/              cliente HTTP, modelo, sondeo de latencia
-reproductor.py     deteccion y lanzamiento de mpv
+reproductor.py     detección y lanzamiento de mpv
 config.py          config de usuario (%APPDATA%\animelite\config.json)
-instalar.py/.bat   instalador (env .venv, deps, mpv)
-anime.bat          lanzador
+instalar.py/.bat   instalador (entorno, dependencias, mpv)
+anime.bat          lanzador local
 ```
