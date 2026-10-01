@@ -11,9 +11,10 @@ BASE = "https://monoschinos.st"
 REF = BASE + "/"
 
 _RE_CARD = re.compile(
-    r'<a href="(' + re.escape(BASE) + r'/anime/[^"]+)"[^>]*>.*?<h3[^>]*>(.*?)</h3>',
-    re.S,
+    r'<a href="(' + re.escape(BASE) + r'/anime/[^"/]+)"[^>]*>(.*?)</a>', re.S
 )
+_RE_H3 = re.compile(r"<h3[^>]*>(.*?)</h3>", re.S)
+_RE_IMG = re.compile(r'(?:data-src|src)="([^"]+\.(?:jpg|jpeg|png|webp))"', re.I)
 _RE_AJAX = re.compile(r'data-ajax="[^"]*/ajax/ajax_pagination/(\d+)"')
 _RE_PLAYER = re.compile(r'class="srv[^"]*"[^>]*data-player="([^"]+)"')
 
@@ -22,17 +23,35 @@ def _limpia(texto):
     return unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", texto))).strip()
 
 
+def _titulo(bloque):
+    m = _RE_H3.search(bloque)
+    return _limpia(m.group(1)) if m else ""
+
+
+def _imagen(bloque):
+    m = _RE_IMG.search(bloque)
+    if not m:
+        return ""
+    src = unescape(m.group(1)).strip()
+    if src.startswith("//"):
+        return "https:" + src
+    if src.startswith("http"):
+        return src
+    return BASE + ("/" + src if not src.startswith("/") else src)
+
+
 def buscar(query: str) -> list:
     url = f"{BASE}/buscar?q={urllib.parse.quote(query.strip())}"
     html, _ = get_text(url, referer=REF)
     if html is None:
         return []
     out = []
-    for enlace, titulo in _RE_CARD.findall(html):
-        t = _limpia(titulo)
+    for enlace, bloque in _RE_CARD.findall(html):
+        t = _titulo(bloque)
         slug = enlace.split("/anime/")[-1]
         if t and slug:
-            out.append(Anime(sitio="monoschinos", titulo=t, slug=slug, url=enlace))
+            out.append(Anime(sitio="monoschinos", titulo=t, slug=slug, url=enlace,
+                             imagen=_imagen(bloque)))
     vistos = set()
     unicos = []
     for a in out:

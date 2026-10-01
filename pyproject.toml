@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "animelite-engine"
+version = "1.0.0"
+description = "Motor de busqueda y resolucion de anime reutilizable (animelite-cli)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["core", "sitios", "resolvers"]

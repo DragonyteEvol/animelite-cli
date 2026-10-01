@@ -10,9 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reproductor
 from core import probe
 from resolvers import aplicar
-from sitios import animeflv, jkanime, monoschinos, tioanime
-
-SITIOS = [tioanime, jkanime, animeflv, monoschinos]
+from sitios import SITIOS
 
 try:
     import colorama

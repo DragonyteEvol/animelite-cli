@@ -51,6 +51,7 @@ def buscar(query: str) -> list:
             out.append(Anime(
                 sitio="animeflv", titulo=t, slug=slug,
                 url=f"{BASE}/anime/{slug}",
+                imagen=f"{BASE}/cdn/img/portada/{slug}.webp",
             ))
     vistos = set()
     unicos = []

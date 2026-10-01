@@ -7,6 +7,7 @@ class Anime:
     titulo: str
     slug: str
     url: str = ""
+    imagen: str = ""
 
 
 @dataclass

@@ -11,6 +11,9 @@ BASE = "https://jkanime.net"
 _RE_ANIME = re.compile(
     r'<h5><a\s+href="(https://jkanime\.net/[^"/]+/)"[^>]*>(.*?)</a></h5>', re.S
 )
+# La portada viaja en data-setbg y aparece ANTES del <h5> de su tarjeta, asi
+# que se empareja por posicion: la ultima data-setbg previa a cada titulo.
+_RE_SETBG = re.compile(r'data-setbg="([^"]+)"')
 _RE_ID = re.compile(r"ajax/episodes/(\d+)")
 _RE_TOKEN = re.compile(r'<meta name="csrf-token" content="([^"]+)"')
 _RE_SERVERS = re.compile(r"var\s+servers\s*=\s*(\[.*?\]);", re.S)
@@ -38,8 +41,17 @@ def buscar(query: str) -> list:
     if html is None:
         return []
     tokens = set(_normalizar(query).split())
+    portadas = [(m.start(), unescape(m.group(1)).strip())
+                for m in _RE_SETBG.finditer(html)]
     out = []
-    for url, titulo in _RE_ANIME.findall(html):
+    previo = -1
+    for m in _RE_ANIME.finditer(html):
+        url, titulo = m.group(1), m.group(2)
+        imagen = ""
+        for pos, val in portadas:
+            if previo < pos <= m.start():
+                imagen = val
+        previo = m.start()
         t = re.sub(r"<[^>]+>", "", titulo)
         t = unescape(re.sub(r"\s+", " ", t)).strip()
         if not t:
@@ -50,7 +62,9 @@ def buscar(query: str) -> list:
         if not tokens or not (tokens & nt):
             continue
         out.append(
-            Anime(sitio="jkanime", titulo=t, slug=url.rstrip("/").split("/")[-1], url=url)
+            Anime(sitio="jkanime", titulo=t,
+                  slug=url.rstrip("/").split("/")[-1], url=url,
+                  imagen=imagen)
         )
     return out
 
